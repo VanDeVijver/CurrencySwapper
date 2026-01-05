@@ -1,0 +1,23 @@
+﻿@model ConvertViewModel
+@{
+    ViewData["Title"] = "Convert";
+}
+
+<h2>Convert EUR to USD</h2>
+
+<div>
+    <form asp-action="Convert" asp-controller="Currency">
+        <label>Euro</label>
+        <input type="text" asp-for="Amount" />
+        <span asp-validation-for="Amount" style="color:red;"></span>
+        <br /><br />
+        <button type="submit">Convert to EUR to USD</button>
+    </form>
+
+    @if (Model?.ShowResult == true)
+    {
+        <p style="padding:10px; font-size: 30pt;">
+            <b>@Model.Amount</b> EUR = <b>@Model.ConvertedAmount.ToString("N2")</b> USD
+        </p>
+    }
+</div>
