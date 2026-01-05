@@ -69,22 +69,65 @@ namespace Howest.Prog.Cia.CurrencySwapper.Core.Tests
         public void Convert_ConvertibleCurrencies_ReturnsProductOfAmountAndRate() //testing Convert(decimal, string, string)
         {
             //arrange
+            //Mock Injection
+            var rateServiceMock = new Mock<IRateService>(MockBehavior.Strict);
+            //has a method CanConvertBetween which returns a bool which is default set to false
+         
+            var converter = new CurrencyConverter(rateServiceMock.Object);
+
+            decimal amount = 25m;
+            decimal rate = 2m;
+            decimal expectedResult= 50m;
+            string from = "AAA";
+            string to = "BBB";
+
+            var mockedRate = new Rate
+            {
+                ExchangeRate = rate,
+                FromCurrency = from,
+                ToCurrency = to,
+            };
+
+            //mock training
+            rateServiceMock.Setup(service => service.CanConvertBetween(from, to))
+                .Returns(true);
+
+                rateServiceMock.Setup(service => service.GetRate(from, to))
+                .Returns(mockedRate);
 
             //act
-
+            decimal actualResult = converter.Convert(amount, from, to);
             //assert
-            throw new NotImplementedException();
+            Assert.Equal(expectedResult, actualResult);
         }
 
         [Fact(DisplayName = "Currency Conversion uses IRateService.GetRate")]
-        public void Convert_CallsIRateServiceGetRate() //testing Convert(decimal, string, string)
+        public void Convert_ConvertibleCurrencies_CallsIRateServiceGetRate() //testing Convert(decimal, string, string)
         {
             //arrange
+            var rateServiceMock = new Mock<IRateService>(MockBehavior.Strict);
+            var converter = new CurrencyConverter(rateServiceMock.Object);
+
+            decimal amount = 42;
+            string from = "ABC";
+            string to = "DEF";
+
+            //uses it when it doesn't matter what the values are because you'll set it to true anyway
+            rateServiceMock.Setup(service => service.CanConvertBetween(It.IsAny<String>(), It.IsAny<String>()))
+               .Returns(true);
+
+            rateServiceMock.Setup(service => service.GetRate(It.IsAny<String>(), It.IsAny<String>()))
+                    .Returns(new Rate
+                    {
+                        ExchangeRate = 1
+                    });
 
             //act
-
+            converter.Convert(amount, from, to);
             //assert
-            throw new NotImplementedException();
+
+            //uses moq.Verify
+            rateServiceMock.Verify(service => service.GetRate(from, to), Times.Once);
         }
 
         [Fact(DisplayName = "Converting to or from an unknown currency throws NotSupportedException")]
